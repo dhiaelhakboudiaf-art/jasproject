@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Jasmine</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+  body, html { width:100%; height:100%; overflow:hidden; }
+  body { background: linear-gradient(135deg, #f6c1ff, #c1f0ff); display:flex; justify-content:center; align-items:center; flex-direction:column; }
+  .screen { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; transition: opacity 1s ease, transform 1s ease; }
+  .hidden { opacity:0; pointer-events:none; transform:scale(0.95); }
+  .typing { font-size:1.5rem; color:#fff; text-align:center; max-width:90%; }
+  .typing::after { content:"|"; animation: blink 0.7s infinite; margin-left:2px; }
+  @keyframes blink { 0%,50%,100%{opacity:1;} 25%,75%{opacity:0;} }
+  button { padding: 0.8rem 1.5rem; font-size:1.2rem; border:none; border-radius:12px; cursor:pointer; background: #ff9de2; color:#fff; box-shadow: 0 0 10px #ff9de2; transition: all 0.3s ease; }
+  button:hover { transform: scale(1.1); box-shadow: 0 0 20px #ff9de2; }
+  .invisible { display:none; }
+  canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+  #finalScreen .title { font-size:2rem; color:#fff; margin-bottom:1rem; }
+  #finalScreen .message { font-size:1.2rem; color:#fff; text-align:center; max-width:90%; line-height:1.6; margin-bottom:2rem; }
+</style>
+</head>
+<body>
+
+<div id="firstScreen" class="screen">
+  <div id="firstTyping" class="typing"></div>
+  <button id="firstButton">Look 👀</button>
+</div>
+
+<div id="secondScreen" class="screen hidden">
+  <div style="font-size:1.5rem; color:#fff; margin-bottom:20px;"> Are you ready? 😏</div>
+  <button id="catchButton">Catch Me 😜</button>
+</div>
+
+<div id="finalScreen" class="screen hidden">
+  <div class="title">Happy Birthday Jasmine 🎂</div>
+  <div id="finalMessage" class="message typing"></div>
+  <button id="celebrateButton" class="invisible">Click to Celebrate 🎉</button>
+</div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+function typeText(element, text, speed=50, callback=null) {
+  let i = 0;
+  element.innerHTML = "";
+  let interval = setInterval(() => {
+    element.innerHTML += text.charAt(i);
+    i++;
+    if(i >= text.length){
+      clearInterval(interval);
+      if(callback) callback();
+    }
+  }, speed);
+}
+
+/* First screen */
+const firstScreen = document.getElementById("firstScreen");
+const firstButton = document.getElementById("firstButton");
+const firstTyping = document.getElementById("firstTyping");
+
+typeText(firstTyping, "So… you were right. m3a el asafi el chadid 😔 You knew I was going to make this .Maybe it wasnt a surprise,but it was never just about the surprise.It was about doing something for you.Something real.Now… look what your nerd friend was able to do 🤓");
+
+firstButton.addEventListener("click", ()=> {
+  firstScreen.classList.add("hidden");
+  secondScreen.classList.remove("hidden");
+});
+
+/* Second screen - harder & changing text */
+const secondScreen = document.getElementById("secondScreen");
+const catchButton = document.getElementById("catchButton");
+
+let attempts = 0;
+let maxAttempts = 20; // longer game
+let speedMultiplier = 1;
+
+const texts = ["Catch Me 😜","Nope 😏","Try Again 😝","Almost Got Me 🤪","Haha 😎","You Can't! 😤","So Close 😳","Keep Trying 😇"];
+
+function moveButtonRandom() {
+  const btnRect = catchButton.getBoundingClientRect();
+  const screenWidth = window.innerWidth - btnRect.width - 20;
+  const screenHeight = window.innerHeight - btnRect.height - 20;
+
+  const x = Math.random() * screenWidth;
+  const y = Math.random() * screenHeight;
+  const scale = 0.8 + Math.random() * 0.5;
+  const rotate = Math.random() * 45 - 22.5;
+
+  catchButton.style.transition = `all ${0.25/speedMultiplier}s ease`;
+  catchButton.style.position = "absolute";
+  catchButton.style.left = `${x}px`;
+  catchButton.style.top = `${y}px`;
+  catchButton.style.transform = `translate(0,0) scale(${scale}) rotate(${rotate}deg)`;
+
+  // Change button text randomly
+  catchButton.textContent = texts[Math.floor(Math.random()*texts.length)];
+
+  attempts++;
+  speedMultiplier += 0.15;
+
+  if(attempts >= maxAttempts){
+    catchButton.style.transition = "all 0.3s ease";
+    catchButton.style.left = "50%";
+    catchButton.style.top = "50%";
+    catchButton.style.transform = "translate(-50%,-50%) scale(1) rotate(0deg)";
+    catchButton.textContent = "Okay okay 😅 you win! Tap me";
+    catchButton.removeEventListener("mouseover", runAway);
+    catchButton.removeEventListener("touchstart", runAway);
+  }
+}
+
+function runAway(e){ moveButtonRandom(); }
+
+catchButton.addEventListener("mouseover", runAway);
+catchButton.addEventListener("touchstart", runAway);
+catchButton.addEventListener("click", ()=> {
+  if(attempts >= maxAttempts){
+    secondScreen.classList.add("hidden");
+    finalScreen.classList.remove("hidden");
+    startFinalTyping();
+  }
+});
+
+/* Final Screen */
+const finalScreen = document.getElementById("finalScreen");
+const finalMessage = document.getElementById("finalMessage");
+const celebrateButton = document.getElementById("celebrateButton");
+
+const finalText = `Happy Birthday JaS! 🎉
+
+You are officially one year older and somehow even more awesome 😌
+
+I hope your day is full of cake, laughs, surprises, and zero stress.
+
+Thank you for being such a special person.
+
+Stay crazy, stay beautiful, and never stop being you.
+
+Today is YOUR day 👑`;
+
+function startFinalTyping(){
+  typeText(finalMessage, finalText, 40, ()=> celebrateButton.classList.remove("invisible"));
+}
+
+celebrateButton.addEventListener("click", startCelebration);
+
+/* Celebration Effects - only confetti & fireworks */
+const canvas = document.getElementById("confettiCanvas");
+const ctx = canvas.getContext("2d");
+let confettiArray = [];
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+function random(min,max){ return Math.random()*(max-min)+min; }
+
+class Confetti {
+  constructor(){ this.x=random(0,canvas.width); this.y=random(-canvas.height,0); this.size=random(5,10); this.color=`hsl(${Math.random()*360},100%,70%)`; this.speed=random(2,5); this.angle=random(0,2*Math.PI); this.spin=random(-0.1,0.1); }
+  update(){ this.y+=this.speed; this.x+=Math.sin(this.angle)*2; this.angle+=this.spin; if(this.y>canvas.height)this.y=random(-canvas.height,0); if(this.x>canvas.width)this.x=0; if(this.x<0)this.x=canvas.width; }
+  draw(){ ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+}
+function createConfetti(num){ for(let i=0;i<num;i++) confettiArray.push(new Confetti()); }
+
+const fireworks=[];
+class Firework{
+  constructor(){ this.x=random(0,canvas.width); this.y=random(0,canvas.height/2); this.particles=[]; for(let i=0;i<20;i++){ this.particles.push({x:this.x,y:this.y,angle:random(0,2*Math.PI),speed: random(2,6),color:`hsl(${Math.random()*360},100%,70%)`});} }
+  update(){ this.particles.forEach(p=>{p.x+=Math.cos(p.angle)*p.speed;p.y+=Math.sin(p.angle)*p.speed;p.speed*=0.95;}); }
+  draw(){ this.particles.forEach(p=>{ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();});}
+}
+function createFireworks(num){ for(let i=0;i<num;i++) fireworks.push(new Firework()); }
+
+function addGlow(){ document.body.style.boxShadow="0 0 50px #ff9de2,0 0 100px #c1f0ff inset"; document.body.style.transition="all 1s ease"; }
+
+function startCelebration(){
+  addGlow();
+  createConfetti(150);
+  createFireworks(5);
+  animateAll();
+}
+
+function animateAll(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  confettiArray.forEach(c=>{c.update();c.draw();});
+  fireworks.forEach(f=>{f.update();f.draw();});
+  requestAnimationFrame(animateAll);
+}
+
+window.addEventListener("resize", ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+</script>
+</body>
+</html>
